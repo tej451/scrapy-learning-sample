@@ -1,0 +1,58 @@
+buildscript {
+    dependencies {
+        //Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4+"
+    }
+}
+plugins {
+  id "com.linkedin.python-sdist" version "0.6.12"
+}
+repositories {
+  pyGradlePyPi()
+  ivy {
+    name 'pypi-local'   //optional, but nice
+    //url 'http://192.168.0.18:8081/artifactory/gradle-dev'
+    url 'http://10.54.68.228:8081/artifactory/gradle-dev'
+    layout "pattern", {
+      ivy "[organisation]/[module]/[revision]/[module]-[revision].ivy"
+      artifact "[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]"
+      m2compatible = true
+    }
+  }
+}
+dependencies {
+        python 'pypi:Scrapy:1.4.0'
+        python 'pypi:scrapy-splash:0.7.2'
+        //python 'pypi:twisted:17.9.0'
+}
+allprojects {
+    apply plugin: "com.jfrog.artifactory"
+}
+
+artifactory {
+    contextUrl = "${artifactory_contextUrl}"   //The base Artifactory URL if not overridden by the publisher/resolver
+    publish {
+        repository {
+            repoKey = 'gradle-dev-local'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = true
+            
+        }
+    }
+    resolve {
+        repository {
+            repoKey = 'gradle-dev'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = true
+            
+        }
+    }
+}
+
+
+
+//repositories {
+//   pyGradlePyPi()
+//}
